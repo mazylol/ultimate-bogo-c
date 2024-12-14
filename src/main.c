@@ -1,10 +1,8 @@
-#include <assert.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include <unistd.h>
 
 #define NUM_THREADS 4
 
@@ -36,6 +34,8 @@ int check(const int *array, const int n) {
 
     return 1;
 }
+
+int shuffles = 0;
 
 int stop = 0;
 pthread_mutex_t stopMutex;
@@ -70,6 +70,9 @@ void *sort(void *arguments) {
         }
 
         shuffle(args->array, args->n);
+        pthread_mutex_lock(&stopMutex);
+        shuffles += 1;
+        pthread_mutex_unlock(&stopMutex);
     }
 
     setStop(1);
@@ -130,6 +133,8 @@ int main() {
     for (int i = 0; i < NUM_THREADS; i++) {
         pthread_join(threads[i], NULL);
     }
+
+    printf("Shuffles: %d\n", shuffles);
 
     pthread_mutex_destroy(&stopMutex);
 
